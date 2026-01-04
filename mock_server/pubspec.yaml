@@ -1,0 +1,13 @@
+name: mock_server
+description: Mock API server for Task Master app
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  shelf: ^1.4.0
+  shelf_router: ^1.1.0
+  dart_jsonwebtoken: ^2.13.0
+  uuid: ^4.3.0
