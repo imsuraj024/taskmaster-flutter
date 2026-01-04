@@ -2,6 +2,7 @@ import 'package:task_master/data/models/sync_operation_model.dart';
 import 'package:task_master/data/models/task_model.dart';
 import 'package:task_master/data/datasources/local/sync_queue_local_data_source.dart';
 import 'package:task_master/data/datasources/local/task_local_data_source.dart';
+import 'package:task_master/data/repositories/conflict_repository.dart';
 import 'package:task_master/core/services/connectivity_service.dart';
 import 'package:task_master/core/constants/enums.dart';
 import 'dart:async';
@@ -28,13 +29,15 @@ class SyncRepository {
   final SyncQueueLocalDataSource _syncQueueDataSource;
   final TaskLocalDataSource _taskDataSource;
   final ConnectivityService _connectivityService;
+  final ConflictRepository? _conflictRepository;
   // TODO: Add TaskApi when implementing remote sync
 
   SyncRepository(
     this._syncQueueDataSource,
     this._taskDataSource,
-    this._connectivityService,
-  );
+    this._connectivityService, {
+    ConflictRepository? conflictRepository,
+  }) : _conflictRepository = conflictRepository;
 
   /// Add task operation to sync queue
   Future<void> queueOperation({

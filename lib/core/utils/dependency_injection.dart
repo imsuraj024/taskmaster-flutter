@@ -2,8 +2,10 @@ import 'package:get/get.dart';
 import 'package:task_master/core/database/database_helper.dart';
 import 'package:task_master/data/datasources/local/task_local_data_source.dart';
 import 'package:task_master/data/datasources/local/sync_queue_local_data_source.dart';
+import 'package:task_master/data/datasources/local/conflict_local_data_source.dart';
 import 'package:task_master/data/repositories/task_repository_impl.dart';
 import 'package:task_master/data/repositories/sync_repository.dart';
+import 'package:task_master/data/repositories/conflict_repository.dart';
 import 'package:task_master/domain/repositories/task_repository.dart';
 import 'package:task_master/presentation/controllers/task_controller.dart';
 import 'package:task_master/core/services/connectivity_service.dart';
@@ -30,12 +32,26 @@ class DependencyInjection {
       fenix: true,
     );
 
+    Get.lazyPut<ConflictLocalDataSource>(
+      () => ConflictLocalDataSource(Get.find<DatabaseHelper>()),
+      fenix: true,
+    );
+
     // Repositories
+    Get.lazyPut<ConflictRepository>(
+      () => ConflictRepository(
+        Get.find<ConflictLocalDataSource>(),
+        Get.find<TaskLocalDataSource>(),
+      ),
+      fenix: true,
+    );
+
     Get.lazyPut<SyncRepository>(
       () => SyncRepository(
         Get.find<SyncQueueLocalDataSource>(),
         Get.find<TaskLocalDataSource>(),
         Get.find<ConnectivityService>(),
+        conflictRepository: Get.find<ConflictRepository>(),
       ),
       fenix: true,
     );
