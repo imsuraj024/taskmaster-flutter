@@ -8,6 +8,7 @@ import 'package:task_master/data/repositories/sync_repository.dart';
 import 'package:task_master/data/repositories/conflict_repository.dart';
 import 'package:task_master/domain/repositories/task_repository.dart';
 import 'package:task_master/presentation/controllers/task_controller.dart';
+import 'package:task_master/presentation/screens/conflict_resolution_screen.dart';
 import 'package:task_master/core/services/connectivity_service.dart';
 
 /// Dependency injection setup using GetX
@@ -67,6 +68,11 @@ class DependencyInjection {
     // Controllers
     Get.lazyPut<TaskController>(
       () => TaskController(Get.find<TaskRepository>()),
+      fenix: true,
+    );
+
+    Get.lazyPut<ConflictController>(
+      () => ConflictController(Get.find<ConflictRepository>()),
       fenix: true,
     );
   }
