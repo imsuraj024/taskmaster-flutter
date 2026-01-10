@@ -243,7 +243,7 @@ class TaskListScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<TaskStatus>(
-                  value: selectedStatus,
+                  initialValue: selectedStatus,
                   decoration: const InputDecoration(labelText: 'Status'),
                   items: TaskStatus.values
                       .map(
@@ -261,7 +261,7 @@ class TaskListScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<TaskPriority>(
-                  value: selectedPriority,
+                  initialValue: selectedPriority,
                   decoration: const InputDecoration(labelText: 'Priority'),
                   items: TaskPriority.values
                       .map(
