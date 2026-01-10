@@ -13,6 +13,7 @@ import 'package:task_master/presentation/screens/conflict_resolution_screen.dart
 import 'package:task_master/core/services/connectivity_service.dart';
 import 'package:task_master/core/services/auth_service.dart';
 import 'package:task_master/core/services/import_export_service.dart';
+import 'package:task_master/core/services/task_api_service.dart';
 
 /// Dependency injection setup using GetX
 class DependencyInjection {
@@ -21,13 +22,45 @@ class DependencyInjection {
     Get.lazyPut<DatabaseHelper>(() => DatabaseHelper.instance, fenix: true);
 
     // Dio HTTP client
+    // Note: Use 10.0.2.2 for Android emulator (maps to host's localhost)
+    // Use localhost for iOS simulator or web
     final dio = Dio(
       BaseOptions(
-        baseUrl: 'http://localhost:8080',
+        baseUrl: 'http://10.0.2.2:8080',
         connectTimeout: const Duration(seconds: 10),
         receiveTimeout: const Duration(seconds: 10),
       ),
     );
+
+    // Add logging interceptor
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          print('🌐 API Request: ${options.method} ${options.uri}');
+          print('Headers: ${options.headers}');
+          if (options.data != null) {
+            print('Data: ${options.data}');
+          }
+          return handler.next(options);
+        },
+        onResponse: (response, handler) {
+          print(
+            '✅ API Response: ${response.statusCode} ${response.requestOptions.uri}',
+          );
+          print('Data: ${response.data}');
+          return handler.next(response);
+        },
+        onError: (error, handler) {
+          print(
+            '❌ API Error: ${error.response?.statusCode} ${error.requestOptions.uri}',
+          );
+          print('Error Message: ${error.message}');
+          print('Response Data: ${error.response?.data}');
+          return handler.next(error);
+        },
+      ),
+    );
+
     Get.put<Dio>(dio, permanent: true);
 
     // Services
@@ -69,11 +102,16 @@ class DependencyInjection {
       fenix: true,
     );
 
+    // API Service
+    final taskApiService = TaskApiService(dio);
+    Get.put<TaskApiService>(taskApiService, permanent: true);
+
     Get.lazyPut<SyncRepository>(
       () => SyncRepository(
         Get.find<SyncQueueLocalDataSource>(),
         Get.find<TaskLocalDataSource>(),
         Get.find<ConnectivityService>(),
+        Get.find<TaskApiService>(),
         conflictRepository: Get.find<ConflictRepository>(),
       ),
       fenix: true,

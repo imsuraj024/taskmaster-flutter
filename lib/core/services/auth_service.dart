@@ -71,7 +71,11 @@ class AuthService {
         data: {'email': email, 'password': password, 'name': name},
       );
 
-      final data = response.data as Map<String, dynamic>;
+      // Handle both Map and String responses
+      final data = response.data is String
+          ? jsonDecode(response.data as String) as Map<String, dynamic>
+          : response.data as Map<String, dynamic>;
+
       await _saveAuthData(
         data['token'] as String,
         data['user'] as Map<String, dynamic>,
@@ -79,6 +83,13 @@ class AuthService {
 
       return data['user'] as Map<String, dynamic>;
     } catch (e) {
+      print('❌ API Error - Registration Failed:');
+      print('Email: $email');
+      print('Error: $e');
+      if (e is DioException) {
+        print('Status Code: ${e.response?.statusCode}');
+        print('Response Data: ${e.response?.data}');
+      }
       throw Exception('Registration failed: ${e.toString()}');
     }
   }
@@ -94,7 +105,11 @@ class AuthService {
         data: {'email': email, 'password': password},
       );
 
-      final data = response.data as Map<String, dynamic>;
+      // Handle both Map and String responses
+      final data = response.data is String
+          ? jsonDecode(response.data as String) as Map<String, dynamic>
+          : response.data as Map<String, dynamic>;
+
       await _saveAuthData(
         data['token'] as String,
         data['user'] as Map<String, dynamic>,
@@ -102,6 +117,13 @@ class AuthService {
 
       return data['user'] as Map<String, dynamic>;
     } catch (e) {
+      print('❌ API Error - Login Failed:');
+      print('Email: $email');
+      print('Error: $e');
+      if (e is DioException) {
+        print('Status Code: ${e.response?.statusCode}');
+        print('Response Data: ${e.response?.data}');
+      }
       throw Exception('Login failed: ${e.toString()}');
     }
   }
@@ -125,6 +147,12 @@ class AuthService {
 
       return newToken;
     } catch (e) {
+      print('❌ API Error - Token Refresh Failed:');
+      print('Error: $e');
+      if (e is DioException) {
+        print('Status Code: ${e.response?.statusCode}');
+        print('Response Data: ${e.response?.data}');
+      }
       throw Exception('Token refresh failed: ${e.toString()}');
     }
   }

@@ -4,8 +4,10 @@ import 'package:task_master/data/datasources/local/sync_queue_local_data_source.
 import 'package:task_master/data/datasources/local/task_local_data_source.dart';
 import 'package:task_master/data/repositories/conflict_repository.dart';
 import 'package:task_master/core/services/connectivity_service.dart';
+import 'package:task_master/core/services/task_api_service.dart';
 import 'package:task_master/core/constants/enums.dart';
 import 'dart:async';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 /// Response from delta sync operation
 class SyncResponse {
@@ -30,14 +32,26 @@ class SyncRepository {
   final TaskLocalDataSource _taskDataSource;
   final ConnectivityService _connectivityService;
   final ConflictRepository? _conflictRepository;
-  // TODO: Add TaskApi when implementing remote sync
+  final TaskApiService _taskApiService;
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   SyncRepository(
     this._syncQueueDataSource,
     this._taskDataSource,
-    this._connectivityService, {
+    this._connectivityService,
+    this._taskApiService, {
     ConflictRepository? conflictRepository,
   }) : _conflictRepository = conflictRepository;
+
+  /// Get last sync timestamp
+  Future<String?> _getLastSyncTime() async {
+    return await _storage.read(key: 'last_sync_time');
+  }
+
+  /// Save last sync timestamp
+  Future<void> _saveLastSyncTime(String timestamp) async {
+    await _storage.write(key: 'last_sync_time', value: timestamp);
+  }
 
   /// Add task operation to sync queue
   Future<void> queueOperation({
