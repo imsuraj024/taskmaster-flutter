@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:dio/dio.dart';
 import 'package:task_master/core/database/database_helper.dart';
 import 'package:task_master/data/datasources/local/task_local_data_source.dart';
 import 'package:task_master/data/datasources/local/sync_queue_local_data_source.dart';
@@ -10,6 +11,8 @@ import 'package:task_master/domain/repositories/task_repository.dart';
 import 'package:task_master/presentation/controllers/task_controller.dart';
 import 'package:task_master/presentation/screens/conflict_resolution_screen.dart';
 import 'package:task_master/core/services/connectivity_service.dart';
+import 'package:task_master/core/services/auth_service.dart';
+import 'package:task_master/core/services/import_export_service.dart';
 
 /// Dependency injection setup using GetX
 class DependencyInjection {
@@ -17,10 +20,29 @@ class DependencyInjection {
     // Core
     Get.lazyPut<DatabaseHelper>(() => DatabaseHelper.instance, fenix: true);
 
+    // Dio HTTP client
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: 'http://localhost:8080',
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 10),
+      ),
+    );
+    Get.put<Dio>(dio, permanent: true);
+
     // Services
     final connectivityService = ConnectivityService();
     connectivityService.initialize();
     Get.put<ConnectivityService>(connectivityService, permanent: true);
+
+    final authService = AuthService(dio);
+    authService.setupInterceptor();
+    Get.put<AuthService>(authService, permanent: true);
+
+    Get.lazyPut<ImportExportService>(
+      () => ImportExportService(Get.find<TaskLocalDataSource>()),
+      fenix: true,
+    );
 
     // Data sources
     Get.lazyPut<TaskLocalDataSource>(

@@ -25,6 +25,10 @@ class TaskListScreen extends StatelessWidget {
             icon: const Icon(Icons.filter_list),
             onPressed: () => _showFilterDialog(context, controller),
           ),
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () => Get.toNamed(AppRoutes.settings),
+          ),
         ],
       ),
       body: Obx(() {
